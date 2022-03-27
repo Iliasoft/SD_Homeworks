@@ -290,7 +290,6 @@ class VendingMachine:
             else:
                 all_inventory[other.__inventory[inv][0]] = other.__inventory[inv][1]
 
-        #print(all_inventory)
         combined_vending_machine = VendingMachine()
         combined_vending_machine.__vending_items.update(self.__vending_items)
         combined_vending_machine.__vending_items.update(other.__vending_items)
