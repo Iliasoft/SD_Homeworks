@@ -431,7 +431,7 @@ myMachine.purcaseItem(7, {myMachine.billS10: 1})  # fail - out of stock
 
 print(f"Machine cash is $ {myMachine.cashier[0]}, cons/bills are: {myMachine.cashier[1]}")
 '''
-#####################################################
+####################################################
 # HW4 specific code
 # provisioning of the second machine
 myMachine2 = VendingMachine()
