@@ -1,18 +1,10 @@
-import copy
-class VendingMachine:
+from vm.VendingMachine import VendingMachine
+
+
+class MyVendingMachine(VendingMachine):
 
     def __init__(self):
-        # means of payment - coin and bill types
-        # first tuple item: value in cents. Second: if it can be returned to user as a change?
-        # defined on factory and can not be altered by operator
-        self.__coin1c = (1, True)
-        self.__billS20 = (2000, False)
-        self.__coin5c = (5, True)
-        self.__coin10c = (10, True)
-        self.__coin25c = (25, True)
-        self.__billS1 = (100, True)
-        self.__billS5 = (500, False)
-        self.__billS10 = (1000, False)
+        super().__init__()
 
         # shelfs and their capacities are defined on factory and can not be altered by operator
         self.__inventory_shelves = (0, 1, 2, 3, 4, 5, 6, 7)
@@ -23,40 +15,7 @@ class VendingMachine:
         self.__vending_items = set()
         self.__inventory = dict()
         self.__purchases = dict()
-
         self.__reset()
-
-    @property
-    def coin1c(self):
-        return self.__coin1c
-
-    @property
-    def coin5c(self):
-        return self.__coin5c
-
-    @property
-    def coin10c(self):
-        return self.__coin10c
-
-    @property
-    def coin25c(self):
-        return self.__coin25c
-
-    @property
-    def billS1(self):
-        return self.__billS1
-
-    @property
-    def billS5(self):
-        return self.__billS5
-
-    @property
-    def billS10(self):
-        return self.__billS10
-
-    @property
-    def billS20(self):
-        return self.__billS20
 
     # use case #1 - Vendor defines which goods will be on sale and their prices
     # this is not quality of goods
@@ -69,7 +28,7 @@ class VendingMachine:
     # use case #2 - Vendor fills the machine with items
     # index - shelf number
     # value - 2 index array - vending item type and number of loaded items
-    def addInventory(self, shelf, vending_item, quantity):
+    def add_inventory(self, shelf, vending_item, quantity):
 
         if shelf not in self.__inventory_shelves:
             #unknows shelf
@@ -92,7 +51,6 @@ class VendingMachine:
         self.inventory[shelf] = [vending_item, quantity]
         return True
 
-    # use case #2.A - Vendor gets a report on which items are left in the machine
     @property
     def inventory(self):
         return self.__inventory
@@ -100,7 +58,7 @@ class VendingMachine:
     # use case #3.A - Vendor gets a report on money in the machine' cashier
     @property
     def cashier(self):
-        return self.__getAmountOfCash(), self.__cashier
+        return self.__get_amount_of_cash(), self.__cashier
 
     # use case #3 - Vendor fills the machine with coins for change
     @cashier.setter
@@ -108,36 +66,16 @@ class VendingMachine:
         self.__cashier = value
 
     # use case #3.B - Vendor takes money from the machine' cashier
-    def substractMoneyFromCashier(self, paymentMethod, quantity):
+    def substract_money_from_cashier(self, paymentMethod, quantity):
         if cashier[paymentMethod] < quantity or quantity <= 0:
             return False
         else:
-            cashier[paymentMethod] -= quantity  # 250 dollars withdrawn
+            cashier[paymentMethod] -= quantity
             return True
-
-    def __reset(self):
-
-        # cashier - current state of funds inside the machine
-        # coins and bills along with their quantity
-        # key - mean of payment object
-        # value - current quantity of coins/bills inside the cashier
-        self.__cashier = dict()
-
-        self.__vending_items = set()
-        # inventory - current state of machine inventory
-        # key: shelf id, it has to be entered by user to purchase the item
-        # value - 2-value array: [0] one of the registered vending items (see below),
-        # [1] - it's current stock, i.e. how many of them are currently available
-        self.__inventory = dict()
-
-        # purchases - purchasing history
-        # key: registered vending items
-        # value - how many items were sold
-        self.__purchases = dict()
 
     # use case #4 - User purchases an item from shelf
     # we will assume that user
-    def purcaseItem(self, shelfNumber, payments):
+    def purchase_item(self, shelfNumber, payments):
         insertedMoney = 0
         for payment in payments.keys():
             insertedMoney += payment[0]*payments[payment]
@@ -239,38 +177,28 @@ class VendingMachine:
         return maxAmountPaymentMethod, cashier[maxAmountPaymentMethod] if maxAmountPaymentMethod else None
 
     def __lt__(self, other):
-        return self.__getAmountOfCash() < other.__getAmountOfCash()
+        return self.__get_amount_of_cash() < other.__get_amount_of_cash()
 
     def __le__(self, other):
-        return self.__getAmountOfCash() <= other.__getAmountOfCash()
+        return self.__get_amount_of_cash() <= other.__get_amount_of_cash()
 
     def __eq__(self, other):
-        return self._getAmountOfCash() == other._getAmountOfCash()
+        return self.__get_amount_of_cash() == other.__get_amount_of_cash()
 
     def __ne__(self, other):
-        return self._getAmountOfCash() != other._getAmountOfCash()
+        return self.__get_amount_of_cash() != other.__get_amount_of_cash()
 
     def __gt__(self, other):
-        return self.__getAmountOfCash() > other.__getAmountOfCash()
+        return self.__get_amount_of_cash() > other.__get_amount_of_cash()
 
     def __ge__(self, other):
-        return self.__getAmountOfCash() >= other.__getAmountOfCash()
+        return self.__get_amount_of_cash() >= other.__get_amount_of_cash()
 
-    def __getAmountOfCash(self):
+    def __get_amount_of_cash(self):
 
         amount = 0
-        monetary_items = (
-            self.__coin1c,
-            self.__coin5c,
-            self.__coin10c,
-            self.__coin25c,
-            self.__billS1,
-            self.__billS5,
-            self.__billS10,
-            self.__billS20
-        )
-        for monetary_item in monetary_items:
-            amount += self.__cashier[monetary_item] * monetary_item[0]
+        for monetary_item in self.__cashier.keys():
+            amount += self.__cashier[monetary_item] * monetary_item.value
 
         return amount/100
 
@@ -290,7 +218,8 @@ class VendingMachine:
             else:
                 all_inventory[other.__inventory[inv][0]] = other.__inventory[inv][1]
 
-        combined_vending_machine = VendingMachine()
+        #print(all_inventory)
+        combined_vending_machine = MyVendingMachine()
         combined_vending_machine.__vending_items.update(self.__vending_items)
         combined_vending_machine.__vending_items.update(other.__vending_items)
 
@@ -299,7 +228,7 @@ class VendingMachine:
             if shelf not in combined_vending_machine.__inventory_shelves:
                 combined_vending_machine.__inventory_shelves = range(shelf)
                 combined_vending_machine.__inventory_shelves_capacity = (list(combined_vending_machine.__inventory_shelves_capacity), all_inventory[inventory_item])
-            combined_vending_machine.addInventory(shelf, inventory_item, all_inventory[inventory_item])
+            combined_vending_machine.add_inventory(shelf, inventory_item, all_inventory[inventory_item])
             shelf += 1
 
         return combined_vending_machine
@@ -330,7 +259,7 @@ class VendingMachine:
                 intersection_inventory[key] = min(inventory_1[key], inventory_2[key])
 
         #print(all_inventory)
-        combined_vending_machine = VendingMachine()
+        combined_vending_machine = MyVendingMachine()
         combined_vending_machine.__vending_items.update(self.__vending_items)
         combined_vending_machine.__vending_items.update(other.__vending_items)
 
@@ -339,134 +268,26 @@ class VendingMachine:
             if shelf not in combined_vending_machine.__inventory_shelves:
                 combined_vending_machine.__inventory_shelves = range(shelf)
                 combined_vending_machine.__inventory_shelves_capacity = (list(combined_vending_machine.__inventory_shelves_capacity), intersection_inventory[inventory_item])
-            combined_vending_machine.addInventory(shelf, inventory_item, intersection_inventory[inventory_item])
+            combined_vending_machine.add_inventory(shelf, inventory_item, intersection_inventory[inventory_item])
             shelf += 1
 
         return combined_vending_machine
-#######################################################################################################################
 
-#
-# Operator-side use cases - machine management
-#
-# instantiating machine
-myMachine = VendingMachine()
+    def __reset(self):
 
-# operator defined what vending items the machine will be capable to sell
-mars = ("Mars bar", 200)
-snickers = ("Snickers bar", 200)
-snickersXXL = ("Snickers XXL bar", 200)
-bounty = ("Bounty bar", 200)
-coke = ("Can of Coke", 150)
-dietCoke = ("Can of Diet Coke", 150)
-pythonBook = ("Python for Convex Problems", 506)  # yes, it is expensive!
-vending_items = set()
-vending_items.add(mars)
-vending_items.add(snickers)
-vending_items.add(snickersXXL)
-vending_items.add(bounty)
-vending_items.add(coke)
-vending_items.add(dietCoke)
-vending_items.add(pythonBook)
-myMachine.provision(vending_items)
+        # cashier - current state of funds inside the machine
+        # coins and bills along with their quantity
+        # key - mean of payment object
+        # value - current quantity of coins/bills inside the cashier
+        self.__cashier = dict()
+        self.__vending_items = set()
+        # inventory - current state of machine inventory
+        # key: shelf id, it has to be entered by user to purchase the item
+        # value - 2-value array: [0] one of the registered vending items (see below),
+        # [1] - it's current stock, i.e. how many of them are currently available
+        self.__inventory = dict()
 
-# operator loads vending items to the machine
-myMachine.addInventory(0, mars, 30)
-myMachine.addInventory(1, mars, 5)
-myMachine.addInventory(2, mars, 15)
-myMachine.addInventory(3, snickers, 10)
-myMachine.addInventory(4, bounty, 10)
-myMachine.addInventory(5, coke, 10)
-myMachine.addInventory(6, dietCoke, 5)
-myMachine.addInventory(7, pythonBook, 1)
-#myMachine.addInventory(8, dietCoke, 5)  # fail - no such shelf
-
-# operator gets report on what items were loaded into machine
-print(f"Machine vending items are: {myMachine.inventory}")
-
-# operator loads the machine with coins
-# machine need coins for change, because credit cards are not invented yet
-cashier = dict()
-cashier[myMachine.coin1c] = 500
-cashier[myMachine.coin5c] = 200
-cashier[myMachine.coin10c] = 100
-cashier[myMachine.coin25c] = 200
-cashier[myMachine.billS1] = 5
-cashier[myMachine.billS5] = 0
-cashier[myMachine.billS10] = 0
-cashier[myMachine.billS20] = 0
-
-myMachine.cashier = cashier
-# suppressing all HW 3 tests
-'''
-
-# operator collects bills (after some time the machine was used)
-# attempt to withdrawn 250 dollars - fail
-myMachine.substractMoneyFromCashier(myMachine.billS5, 50)
-
-# attempt to withdrawn 100 dollars - fail
-myMachine.substractMoneyFromCashier(myMachine.billS10, 10)
-###############################################################################
-###############################################################################
-###############################################################################
-###############################################################################
-#
-# User side use cases including a few negative cases
-#
-# User wants to purchase an item from shelf
-# TC 1
-myMachine.purcaseItem(77, {myMachine.coin25c: 1})  # fail - vending item is not found
-
-# TC 2
-myMachine.purcaseItem(7, {myMachine.billS20: 50})  # fail - can not find exact change to return
-
-# TC 3
-myMachine.purcaseItem(7, {myMachine.coin25c: 1})  # fail - payment is not enough
-
-# TC 4 - user wants to purchase a Python book
-# if the two belows prints are enabled you will see the cashier state before and after purchase
-myMachine.purcaseItem(7, {myMachine.billS10: 1})  # SUCCESS!
-
-# TC 5
-myMachine.purcaseItem(7, {myMachine.billS10: 1})  # fail - out of stock
-
-print(f"Machine cash is $ {myMachine.cashier[0]}, cons/bills are: {myMachine.cashier[1]}")
-'''
-####################################################
-# HW4 specific code
-# provisioning of the second machine
-myMachine2 = VendingMachine()
-
-cashier2 = dict()
-cashier2[myMachine.coin1c] = 500
-cashier2[myMachine.coin5c] = 200
-cashier2[myMachine.coin10c] = 100
-cashier2[myMachine.coin25c] = 200
-cashier2[myMachine.billS1] = 5
-cashier2[myMachine.billS5] = 0
-cashier2[myMachine.billS10] = 0
-cashier2[myMachine.billS20] = 0
-
-myMachine2.cashier = cashier2
-myMachine2.provision(vending_items)
-myMachine2.addInventory(1, mars, 10)
-myMachine2.addInventory(2, mars, 10)
-myMachine2.addInventory(3, snickers, 10)
-myMachine2.addInventory(4, bounty, 10)
-myMachine2.addInventory(5, coke, 10)
-myMachine2.addInventory(6, dietCoke, 10)
-myMachine2.addInventory(7, pythonBook, 10)
-
-# HW4 Task 1. Get vending machines content union/intersection
-print("Machine 1 inventory:", myMachine.inventory)
-print("Machine 2 inventory:", myMachine2.inventory)
-union = myMachine + myMachine2
-print("Machine 1 & 2 inventory union:", union.inventory)
-intersection = myMachine - myMachine2
-print("Machine 1 & 2 inventory intersection:", intersection.inventory)
-
-# HW4 Task 2. Compare vending machines by the amount of cash inside (A > B = True)
-print(f"Machine 1 cash is $ {myMachine.cashier[0]}, cons/bills are: {myMachine.cashier[1]}")
-print(f"Machine 2 cash is $ {myMachine2.cashier[0]}, cons/bills are: {myMachine2.cashier[1]}")
-
-print(f"Machine 1 has more cash than Machine 2 ? {myMachine > myMachine2}")
-print(f"Machine 1 has less cash than Machine 1 ? {myMachine < myMachine2}")
+        # purchases - purchasing history
+        # key: registered vending items
+        # value - how many items were sold
+        self.__purchases = dict()
